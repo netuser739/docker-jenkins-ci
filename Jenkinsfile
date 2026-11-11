@@ -18,7 +18,7 @@ pipeline {
                 sh '''
                     docker run --rm $IMAGE:$BUILD_NUMBER > output.txt
                     cat output.txt
-                    grep -q "Hello from Docker and Jenkins!" output.txt
+                    grep -q "Hello from Docker and Jenkins! CI/CD updated!" output.txt
                 '''
             }
         }
