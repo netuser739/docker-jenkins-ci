@@ -31,11 +31,13 @@ pipeline {
                     passwordVariable: 'DOCKER_TOKEN'
                 )]) {
                     sh '''
-                        echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin
+                        set +x
+                        export DOCKER_CONFIG="$(mktemp -d)"
+                        trap 'docker logout >/dev/null 2>&1 || true; rm -rf "$DOCKER_CONFIG"' EXIT
+                        printf '%s' "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin
                         docker tag $IMAGE:$BUILD_NUMBER $IMAGE:latest
                         docker push $IMAGE:$BUILD_NUMBER
                         docker push $IMAGE:latest
-                        docker logout
                     '''
                 }
             }
@@ -44,7 +46,7 @@ pipeline {
 
     post {
         success {
-            echo 'Docker image successfully built and published!'
+            echo 'Docker image successfully published!'
         }
         failure {
             echo 'Pipeline failed!'
